@@ -1,0 +1,9 @@
+llm:
+  provider: openai
+  model: gpt-4
+  temperature: 0.0
+  api_key: ${OPENAI_API_KEY}  # puedes usar variables de entorno
+
+notion:
+  api_key: ${NOTION_API_KEY}
+  database_id: tu_database_id
