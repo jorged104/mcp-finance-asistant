@@ -12,4 +12,7 @@ wheels/
 
 # Test Files
 /files
+/src/files
 .env
+
+grafo.png

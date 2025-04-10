@@ -5,5 +5,8 @@ from typing_extensions import TypedDict, Annotated
 
 class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
-    nota: Optional[str] = None
-    resumen: Optional[str] = None 
+    file_path: str
+    extracted_text: str
+    markdown: str
+    movimientos: list
+    productos_financieros: list

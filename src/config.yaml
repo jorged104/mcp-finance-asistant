@@ -7,3 +7,7 @@ llm:
 notion:
   api_key: ${NOTION_API_KEY}
   database_id: tu_database_id
+
+mistral:
+  api_key: ${MISTRAL_API_KEY}
+  
