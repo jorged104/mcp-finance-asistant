@@ -14,7 +14,6 @@ def load_config(path="config.yaml",  env_path=".env"):
         
         def resolve_env(val):
             if isinstance(val, str) and val.startswith("${") and val.endswith("}"):
-                print("trey get" , os.getenv(val[2:-1]) )
                 return os.getenv(val[2:-1])
 
             return val
