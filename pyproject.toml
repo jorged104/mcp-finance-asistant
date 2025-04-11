@@ -10,6 +10,7 @@ dependencies = [
     "langgraph>=0.3.27",
     "langsmith>=0.3.27",
     "mistralai>=1.6.0",
+    "pypdf2>=3.0.1",
     "python-dotenv>=1.1.0",
     "pyyaml>=6.0.2",
 ]

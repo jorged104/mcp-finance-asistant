@@ -51,7 +51,7 @@ class ocr_node:
         
         print("======================== Extraxted Markdown ============== ")
        
-        all_markdown = self.get_combined_markdown(ocr_response)
+        all_markdown = "/n\n".join(page.markdown for page in ocr_response.pages)
         print(all_markdown)
 
         return {
