@@ -71,49 +71,4 @@ class ocr_node:
             print(f"Error: {e}")
             return None
 
-    def ocr_image(self, image_base64):
-
-        client = Mistral(api_key=self.api_mistral)
-        ocr_response = client.ocr.process(
-                model="mistral-ocr-latest",
-                document={
-                    "type": "image_url",
-                    "image_url": f"{image_base64}" 
-                }
-            )
-        print("extrating image result")
-        str_markdown = "\n\n".join(page.markdown for page in ocr_response.pages)
-        print(str_markdown)
-        return 
-
-    def get_combined_markdown(self , ocr_response) -> str:
-        markdowns: list[str] = []
-        # Extract images from page
-        for page in ocr_response.pages:
-            image_data = {}
-            for img in page.images:
-                print("Image ID:", img.id)
-                time.sleep(1)  # Rate limit
-                image_data[img.id] = self.ocr_image(img.image_base64)
-            # Replace image placeholders with actual images
-            markdowns.append(self.replace_images_in_markdown(page.markdown, image_data))
-
-        return "\n\n".join(markdowns)
-
-    def replace_images_in_markdown(self, markdown_str: str, images_dict: dict) -> str:
-        """
-        Replace image placeholders in markdown with base64-encoded images.
-
-        Args:
-            markdown_str: Markdown text containing image placeholders
-            images_dict: Dictionary mapping image IDs to base64 strings
-
-        Returns:
-            Markdown text with images replaced by base64 data
-        """
-        for img_name, base64_str in images_dict.items():
-            markdown_str = markdown_str.replace(
-                f"![{img_name}]({img_name})", f"![{img_name}]({base64_str})"
-            )
-        return markdown_str
 
