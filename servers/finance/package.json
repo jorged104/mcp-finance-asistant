@@ -1,20 +1,27 @@
 {
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.9.0"
-  },
   "name": "finance",
   "version": "1.0.0",
-  "main": "index.js",
-  "devDependencies": {
-    "@types/node": "^22.14.1",
-    "typescript": "^5.8.3"
-  },
+  "description": "Finance assistant MCP using Notion API",
+  "main": "build/finance.js",
+  "type": "module",
   "scripts": {
     "build": "tsc",
+    "clean": "rm -rf build",
+    "start": "node build/finance.js",
+    "dev": "ts-node --project tsconfig.json  src/finance.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@notionhq/client": "^2.3.0",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
 }

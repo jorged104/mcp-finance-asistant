@@ -35,7 +35,9 @@ class MCPClient:
         server_params = StdioServerParameters(
             command=command,
             args=[server_script_path],
-            env=None
+            env={"NOTION_TOKEN": "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",
+                 "NOTION_DB_ACCOUNTS":"1cf764d59d8c80c0807ad9fb1510dcc7" ,
+                 "NOTION_DB_TRANSACTIONS":"1cf764d59d8c8061b615c588e7380709"}
         )
 
         stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
