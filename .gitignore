@@ -16,3 +16,9 @@ wheels/
 .env
 
 grafo.png
+
+**/node_modules/
+
+servers/finance/node_modules/
+
+servers/finance/node_modules
