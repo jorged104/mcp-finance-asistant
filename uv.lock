@@ -344,6 +344,19 @@ wheels = [
 ]
 
 [[package]]
+name = "langchain-mcp-adapters"
+version = "0.0.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "langchain-core" },
+    { name = "mcp" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/df/f7/330f9b33c470075e0d4e61a8206a66e2d0e058d00ca8330c02e63624d60d/langchain_mcp_adapters-0.0.8.tar.gz", hash = "sha256:caa3db6f5956e96176fc9ac36acad8c956fb8e8e710d5ada27c02240ca3e0b73", size = 14748 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/22/7f7b11d77cbc0daa85b220f70d27dddcf73f71ca90ebc614c2ccd4443ccf/langchain_mcp_adapters-0.0.8-py3-none-any.whl", hash = "sha256:0e858ace3af932ea7b39274884b0c41312e5288f077df53192e635afd3987c9a", size = 10047 },
+]
+
+[[package]]
 name = "langchain-openai"
 version = "0.3.12"
 source = { registry = "https://pypi.org/simple" }
@@ -455,6 +468,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "langchain-anthropic" },
+    { name = "langchain-mcp-adapters" },
     { name = "langchain-openai" },
     { name = "langgraph" },
     { name = "langsmith" },
@@ -468,6 +482,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "langchain-anthropic", specifier = ">=0.3.10" },
+    { name = "langchain-mcp-adapters", specifier = ">=0.0.8" },
     { name = "langchain-openai", specifier = ">=0.3.12" },
     { name = "langgraph", specifier = ">=0.3.27" },
     { name = "langsmith", specifier = ">=0.3.27" },
