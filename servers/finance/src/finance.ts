@@ -7,11 +7,14 @@ import {
   ListPromptsRequestSchema,
   GetPromptRequestSchema
 } from "@modelcontextprotocol/sdk/types.js";
+import { notion } from "./notion/notionClient.js";
+import { DB_ACCOUNTS_ID } from "./env.js";
 
 const serverMCP = new McpServer({
   name: "Demo",
   version: "1.0.0",
 });
+
 
 const server = serverMCP.server;
 server.registerCapabilities( {

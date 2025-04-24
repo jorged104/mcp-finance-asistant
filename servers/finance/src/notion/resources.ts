@@ -10,15 +10,16 @@ import {
 
 
     server.setRequestHandler(ListResourcesRequestSchema, async () => {
-      const accounts = await notion.databases.query({ database_id: DB_ACCOUNTS_ID });
+   
   
       return {
         resources: [
-          ...accounts.results.map((page: any) => ({
-            uri: `notion://account/${page.id}`,
-            name: page.properties?.Nombre?.title?.[0]?.plain_text || "Cuenta sin nombre",
-            mimeType: "application/json",
-          })),
+          {
+            uri: "notion://accounts",
+            name: "Name of accounts, loans and credit cards get id , numbers and name of the account",
+            mimeType: "application/json"
+          }
+          ,
           {
             uri: "notion://transactions",
             name: "Últimos movimientos financieros",
@@ -32,16 +33,24 @@ import {
     server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       const uri = request.params.uri;
   
-      if (uri.startsWith("notion://account/")) {
-        const id = uri.split("/").pop()!;
-        const page = await notion.pages.retrieve({ page_id: id });
-  
+      if (uri.startsWith("notion://accounts")) {
+        const accounts = await notion.databases.query({ database_id: DB_ACCOUNTS_ID });
+        const data = accounts.results.map((page: any) => ({
+          id: page.id,
+          nombre: page.properties?.Nombre?.title?.[0]?.plain_text || "",
+          numero: page.properties?.Numero?.rich_text?.[0]?.plain_text || "",
+          tipo: page.properties?.["Tipo de cuenta"]?.select?.name || "",
+          diacorte : page.properties?.["Dia de Corte"]?.number || 0,
+          diapago : page.properties?.["Dia de Pago"]?.number || 0,
+          banco: page.properties?.Banco?.select?.name || "",
+        }));
+
         return {
           contents: [
             {
               uri,
               mimeType: "application/json",
-              text: JSON.stringify(page, null, 2)
+              text: JSON.stringify(data, null, 2)
             }
           ]
         };
