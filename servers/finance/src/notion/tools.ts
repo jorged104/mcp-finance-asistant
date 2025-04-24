@@ -66,4 +66,5 @@ export default function registerTools(server: McpServer) {
       }
     }
   );
+ 
 }

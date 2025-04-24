@@ -60,7 +60,7 @@ async def  main():
 
     config = {"configurable": {"thread_id": "26" }}
 
-    while False:
+    while True:
         user_input = input("Write file name : ")
         if user_input.lower() in ["quit", "exit", "q"]:
             print("Goodbye!")
@@ -95,8 +95,6 @@ async def execution():
         
         resourses_list = await client.get_resources( server_name="math")
         for item in resourses_list:
-            print("Resource Name")
-            print(item.source)
             print(item.as_string())
             print(item.metadata)
 
@@ -104,4 +102,4 @@ async def execution():
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(execution())
+    asyncio.run(main())

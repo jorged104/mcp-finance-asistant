@@ -6,11 +6,14 @@ import json
 import base64
 import requests
 import time
+import PyPDF2
+
 class ocr_node:
     def __init__(self, api_mistral : str):
         self.api_mistral = api_mistral
 
     def __call__(self, state : State , config : RunnableConfig):
+      
         print(state["messages"][-1])
         client = Mistral(api_key=self.api_mistral)
 
@@ -30,6 +33,14 @@ class ocr_node:
 
         file_path= state["messages"][-1].content
         
+        texto = self.es_pdf_textual(file_path)
+        if len(texto) > 0:
+            all_markdown = texto
+            return {
+            "messages": [("system", "Markdown combinado de todas las páginas extraído.")],
+            "markdown": all_markdown,
+            }
+
         uploaded_pdf = client.files.upload(
             file={
                 "file_name": "upload_byagent.pdf",
@@ -70,5 +81,31 @@ class ocr_node:
         except Exception as e:  # Added general exception handling
             print(f"Error: {e}")
             return None
+        
+    def es_pdf_textual(ruta_pdf: str) -> bool:
+        """
+        Devuelve True si el PDF tiene texto seleccionable.
+        Devuelve False si no se encontró texto (probablemente escaneado).
+        """
+        if not os.path.isfile(ruta_pdf):
+            print(f"El archivo {ruta_pdf} no existe.")
+            return False
+
+        try:
+            with open(ruta_pdf, 'rb') as archivo:
+                lector = PyPDF2.PdfReader(archivo)
+                # Extraer texto de todas las páginas
+                texto_total = ""
+                for pagina in lector.pages:
+                    texto = pagina.extract_text()
+                    if texto:
+                        texto_total += texto.strip()
+
+                # Si encontramos algo de texto, asumimos que es un PDF con capa de texto
+                
+                return texto_total
+        except Exception as e:
+            print(f"Ocurrió un error al leer el PDF: {e}")
+            return False
 
 

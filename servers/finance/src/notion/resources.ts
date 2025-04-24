@@ -21,9 +21,15 @@ import {
           }
           ,
           {
-            uri: "notion://transactions",
-            name: "Últimos movimientos financieros",
+            uri: "notion://typetransactions",
+            name: "Tipos de transacciones",
             mimeType: "application/json"
+          },
+          {
+            uri: "notion://typespend",
+            name: "Tipos de gasto", 
+            mimeType: "application/json"
+
           }
         ]
       };
@@ -56,29 +62,39 @@ import {
         };
       }
   
-      if (uri === "notion://transactions") {
+      if (uri === "notion://typetransactions") {
         const response = await notion.databases.query({
           database_id: DB_TRANSACTIONS_ID,
           page_size: 100
         });
-  
-        const data = response.results.map((page: any) => ({
-          id: page.id,
-          description: page.properties?.Decription?.title?.[0]?.plain_text || "",
-          date: page.properties?.["Transaction Date"]?.date?.start || null,
-          amount: page.properties?.["Transaction Amount"]?.number,
-          type: page.properties?.["Type Transacction"]?.select?.name || "",
-          spendType: page.properties?.["Type Spend"]?.select?.name || "",
-          origin: page.properties?.Origen?.relation?.[0]?.id || null,
-          destination: page.properties?.Destino?.relation?.[0]?.id || null,
-        }));
-  
+        const data = {
+          types: ['Credito', 'Debito'],
+        }
         return {
           contents: [
             {
               uri,
               mimeType: "application/json",
-              text: JSON.stringify(data, null, 2)
+              text: JSON.stringify({data}, null, 2)
+            }
+          ]
+        };
+      }
+
+      if (uri === "notion://typespend") {
+        const response = await notion.databases.query({
+          database_id: DB_TRANSACTIONS_ID,
+          page_size: 100
+        });
+        const data = {
+          types: ['Gasto Personal', 'Restaurante', 'Super Mercado', 'Transporte', 'Entretenimiento','Telefonia','Otros'],
+        }
+        return {
+          contents: [
+            {
+              uri,
+              mimeType: "application/json",
+              text: JSON.stringify({data}, null, 2)
             }
           ]
         };
