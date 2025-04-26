@@ -13,7 +13,6 @@ export default function registerTools(server: McpServer) {
       type: z.string().optional().describe("Tipo de transacción (Gasto, Ingreso...)"),
       spendType: z.string().optional().describe("Categoría del gasto"),
       origin: z.string().optional().describe("ID de la cuenta origen"),
-      destination: z.string().optional().describe("ID de la cuenta destino"),
     },
     async (input) => {
       try {
@@ -37,9 +36,6 @@ export default function registerTools(server: McpServer) {
             }),
             "Origen": input.origin
               ? { relation: [{ id: input.origin }] }
-              : { relation: [] },
-            "Destino": input.destination
-              ? { relation: [{ id: input.destination }] }
               : { relation: [] },
           },
         });

@@ -26,16 +26,19 @@ class ocr_node:
                     "image_url": f"data:image/jpeg;base64,{base64_image}" 
                 }
             )
-            print(ocr_response)
+            all_markdown = "/n\n".join(page.markdown for page in ocr_response.pages)
+            print(all_markdown)
             return{
-                 "markdown": "nice",
+                 "messages": [("system", "Markdown combinado de todas las páginas extraído.")],
+                 "markdown": all_markdown,
             }
 
         file_path= state["messages"][-1].content
         
-        texto = self.es_pdf_textual(file_path)
+        texto = self.es_pdf_textual("files/"+file_path)
         if len(texto) > 0:
             all_markdown = texto
+            print(all_markdown)
             return {
             "messages": [("system", "Markdown combinado de todas las páginas extraído.")],
             "markdown": all_markdown,
@@ -82,14 +85,14 @@ class ocr_node:
             print(f"Error: {e}")
             return None
         
-    def es_pdf_textual(ruta_pdf: str) -> bool:
+    def es_pdf_textual(self, ruta_pdf: str) -> str:
         """
         Devuelve True si el PDF tiene texto seleccionable.
         Devuelve False si no se encontró texto (probablemente escaneado).
         """
         if not os.path.isfile(ruta_pdf):
             print(f"El archivo {ruta_pdf} no existe.")
-            return False
+            return ""
 
         try:
             with open(ruta_pdf, 'rb') as archivo:
@@ -106,6 +109,6 @@ class ocr_node:
                 return texto_total
         except Exception as e:
             print(f"Ocurrió un error al leer el PDF: {e}")
-            return False
+            return ""  # Return empty string instead of False to indicate no text found
 
 

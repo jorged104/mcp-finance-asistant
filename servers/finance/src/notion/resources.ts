@@ -87,7 +87,7 @@ import {
           page_size: 100
         });
         const data = {
-          types: ['Gasto Personal', 'Restaurante', 'Super Mercado', 'Transporte', 'Entretenimiento','Telefonia','Otros'],
+          types: ['Gasto Personal', 'Restaurante', 'Super Mercado','Pago Cuotas','Transporte', 'Entretenimiento','Telefonia','Otros','Prestamos','Ingreso Sueldo'],
         }
         return {
           contents: [

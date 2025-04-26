@@ -7,6 +7,15 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "aiolimiter"
+version = "1.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/23/b52debf471f7a1e42e362d959a3982bdcb4fe13a5d46e63d28868807a79c/aiolimiter-1.2.1.tar.gz", hash = "sha256:e02a37ea1a855d9e832252a105420ad4d15011505512a1a1d814647451b5cca9", size = 7185 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f3/ba/df6e8e1045aebc4778d19b8a3a9bc1808adb1619ba94ca354d9ba17d86c3/aiolimiter-1.2.1-py3-none-any.whl", hash = "sha256:d3f249e9059a20badcb56b61601a83556133655c11d1eb3dd3e04ff069e5f3c7", size = 6711 },
+]
+
+[[package]]
 name = "annotated-types"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -467,6 +476,7 @@ name = "mcp-finance-asistant"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "aiolimiter" },
     { name = "langchain-anthropic" },
     { name = "langchain-mcp-adapters" },
     { name = "langchain-openai" },
@@ -481,6 +491,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiolimiter", specifier = ">=1.2.1" },
     { name = "langchain-anthropic", specifier = ">=0.3.10" },
     { name = "langchain-mcp-adapters", specifier = ">=0.0.8" },
     { name = "langchain-openai", specifier = ">=0.3.12" },
