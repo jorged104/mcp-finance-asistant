@@ -1,114 +1,108 @@
-from langchain_core.runnables import Runnable, RunnableConfig
-from agents.schemas import State
-from mistralai import Mistral
 import os
-import json
 import base64
 import requests
-import time
+import tempfile
 import PyPDF2
+from mistralai import Mistral
+from langchain_core.runnables import RunnableConfig
+from agents.schemas import State
 
 class ocr_node:
-    def __init__(self, api_mistral : str):
+    def __init__(self, api_mistral: str):
         self.api_mistral = api_mistral
 
-    def __call__(self, state : State , config : RunnableConfig):
-      
-        print(state["messages"][-1])
+    def __call__(self, state: State, config: RunnableConfig):
         client = Mistral(api_key=self.api_mistral)
+        user_input = state["messages"][-1].content.strip()
+        print(f"Archivo recibido: {user_input}")
 
-        if  state["messages"][-1].content.split(".")[1] == "png" or state["messages"][-1].content.split(".")[1] == "jpg":
-            base64_image = self.encode_image(state["messages"][-1].content)
-            ocr_response = client.ocr.process(
-                model="mistral-ocr-latest",
-                document={
-                    "type": "image_url",
-                    "image_url": f"data:image/jpeg;base64,{base64_image}" 
-                }
-            )
-            all_markdown = "/n\n".join(page.markdown for page in ocr_response.pages)
-            print(all_markdown)
-            return{
-                 "messages": [("system", "Markdown combinado de todas las páginas extraído.")],
-                 "markdown": all_markdown,
-            }
+        if user_input.startswith("http"):
+            return self._procesar_url_remota(user_input, client)
 
-        file_path= state["messages"][-1].content
-        
-        texto = self.es_pdf_textual("files/"+file_path)
-        if len(texto) > 0:
-            all_markdown = texto
-            print(all_markdown)
-            return {
-            "messages": [("system", "Markdown combinado de todas las páginas extraído.")],
-            "markdown": all_markdown,
-            }
+        ext = user_input.lower().split(".")[-1]
+        if ext in ["png", "jpg", "jpeg"]:
+            return self._procesar_imagen_local(user_input, client)
 
-        uploaded_pdf = client.files.upload(
-            file={
-                "file_name": "upload_byagent.pdf",
-                "content": open("files/"+file_path, "rb"),
-            },
-            purpose="ocr"
+        elif ext == "pdf":
+            return self._procesar_pdf_local(user_input, client)
+
+        else:
+            return {"messages": [("system", f"Formato de archivo no soportado: {ext}")]}
+
+    def _procesar_imagen_local(self, path, client):
+        base64_image = self.encode_image(path)
+        if not base64_image:
+            return {"messages": [("system", "Error al procesar imagen local")]}
+        ocr_response = client.ocr.process(
+            model="mistral-ocr-latest",
+            document={"type": "image_url", "image_url": f"data:image/jpeg;base64,{base64_image}"}
         )
-        client.files.retrieve(file_id=uploaded_pdf.id)
+        markdown = "\n\n".join(page.markdown for page in ocr_response.pages)
+        return {"messages": [("system", "Markdown combinado de todas las páginas extraído.")], "markdown": markdown}
+
+    def _procesar_pdf_local(self, path, client):
+        texto = self.es_pdf_textual(path)
+        if texto:
+            return {"messages": [("system", "Markdown combinado de todas las páginas extraído.")], "markdown": texto}
+        with open(path, "rb") as file_obj:
+            uploaded_pdf = client.files.upload(file={"file_name": "upload.pdf", "content": file_obj}, purpose="ocr")
         signed_url = client.files.get_signed_url(file_id=uploaded_pdf.id)
         ocr_response = client.ocr.process(
             model="mistral-ocr-latest",
-            document={
-                "type": "document_url",
-                "document_url": signed_url.url,
-            },
+            document={"type": "document_url", "document_url": signed_url.url},
             include_image_base64=True
         )
+        markdown = "\n\n".join(page.markdown for page in ocr_response.pages)
+        return {"messages": [("system", "Markdown combinado de todas las páginas extraído.")], "markdown": markdown}
 
+    def _procesar_url_remota(self, url: str, client):
+        ext = url.split("?")[0].lower().split(".")[-1]
+        if ext in ["png", "jpg", "jpeg"]:
+            ocr_response = client.ocr.process(
+                model="mistral-ocr-latest",
+                document={"type": "image_url", "image_url": url}
+            )
+            markdown = "\n\n".join(page.markdown for page in ocr_response.pages)
+            return {"messages": [("system", "Markdown extraído de imagen remota.")], "markdown": markdown}
+
+        elif ext == "pdf":
+            try:
+                response = requests.get(url)
+                if response.status_code != 200:
+                    raise Exception("Error al descargar el PDF remoto")
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+                    tmp_file.write(response.content)
+                    tmp_path = tmp_file.name
+
+                return self._procesar_pdf_local(tmp_path, client)
+
+            except Exception as e:
+                return {"messages": [("system", f"Error procesando PDF remoto: {e}")]}
+        else:
+            return {"messages": [("system", f"Formato remoto no soportado: {ext}")]}
         
-        print("======================== Extraxted Markdown ============== ")
-       
-        all_markdown = "/n\n".join(page.markdown for page in ocr_response.pages)
-        print(all_markdown)
-
-        return {
-            "messages": [("system", "Markdown combinado de todas las páginas extraído.")],
-            "markdown": all_markdown,
-        }
-
-    def encode_image(self, image_path):
-        """Encode the image to base64."""
+    def encode_image(self, path):
         try:
-            with open("files/"+image_path, "rb") as image_file:
-                return base64.b64encode(image_file.read()).decode('utf-8')
-        except FileNotFoundError:
-            print(f"Error: The file {image_path} was not found.")
+            with open(path, "rb") as image_file:
+                return base64.b64encode(image_file.read()).decode("utf-8")
+        except Exception as e:
+            print(f"Error al codificar imagen: {e}")
             return None
-        except Exception as e:  # Added general exception handling
-            print(f"Error: {e}")
-            return None
-        
-    def es_pdf_textual(self, ruta_pdf: str) -> str:
-        """
-        Devuelve True si el PDF tiene texto seleccionable.
-        Devuelve False si no se encontró texto (probablemente escaneado).
-        """
-        if not os.path.isfile(ruta_pdf):
-            print(f"El archivo {ruta_pdf} no existe.")
+
+    def es_pdf_textual(self, path: str) -> str:
+        if not os.path.isfile(path):
+            print(f"El archivo {path} no existe.")
             return ""
-
         try:
-            with open(ruta_pdf, 'rb') as archivo:
+            with open(path, "rb") as archivo:
                 lector = PyPDF2.PdfReader(archivo)
-                # Extraer texto de todas las páginas
                 texto_total = ""
                 for pagina in lector.pages:
                     texto = pagina.extract_text()
                     if texto:
                         texto_total += texto.strip()
-
-                # Si encontramos algo de texto, asumimos que es un PDF con capa de texto
-                
                 return texto_total
         except Exception as e:
-            print(f"Ocurrió un error al leer el PDF: {e}")
-            return ""  # Return empty string instead of False to indicate no text found
-
-
+            print(f"Error al leer el PDF: {e}")
+            return ""

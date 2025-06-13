@@ -10,3 +10,4 @@ class State(TypedDict):
     markdown: str
     movimientos: list
     productos_financieros: list
+    next : Optional[str] = None
